@@ -9,6 +9,7 @@ import './styles/index.css';
 
 import { Clock, DoubleSide, MeshBasicMaterial } from 'three';
 import { PlayerComponent, PlayerSystem } from './player';
+import { PositionComponent, PositionSystem } from './position';
 import { SpinComponent, SpinSystem } from './spin';
 
 import { GlobalComponent } from './global';
@@ -21,8 +22,10 @@ import { setupScene } from './scene';
 const world = new World();
 world
 	.registerComponent(GlobalComponent)
+	.registerComponent(PositionComponent)
 	.registerComponent(PlayerComponent)
 	.registerComponent(SpinComponent)
+	.registerSystem(PositionSystem)
 	.registerSystem(PlayerSystem)
 	.registerSystem(SpawnSystem)
 	.registerSystem(SpinSystem)
@@ -31,7 +34,7 @@ const clock = new Clock();
 
 console.log('Execution order:', ...world.getSystems());
 
-const { scene, camera, renderer } = setupScene();
+const { scene, camera, renderer, arjs, webcam, deviceOrientationControls } = setupScene();
 const ratk = new RealityAccelerator(renderer.xr);
 ratk.onPlaneAdded = (plane) => {
 	const mesh = plane.planeMesh;
@@ -60,13 +63,18 @@ renderer.xr.addEventListener('sessionstart', () => {
 world
 	.createEntity()
 	.addComponent(GlobalComponent, { renderer, camera, scene, ratk });
+world
+	.createEntity().addComponent(PositionComponent, { arjs, webcam, deviceOrientationControls });
 
-renderer.setAnimationLoop(function () {
-	ratk.update();
+function animate() {
+    ratk.update();
 
-	const delta = clock.getDelta();
-	const time = clock.elapsedTime;
-	world.update(delta, time);
+    const delta = clock.getDelta();
+    const time = clock.elapsedTime;
 
-	renderer.render(scene, camera);
-});
+    world.update(delta, time);
+
+    requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);

@@ -5,44 +5,31 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { DeviceOrientationControls, LocationBased, WebcamRenderer } from '@ar-js-org/ar.js/three.js/build/ar-threex-location-only.js';
+
 import {
-	DirectionalLight,
-	HemisphereLight,
 	PerspectiveCamera,
 	Scene,
 	WebGLRenderer,
-	sRGBEncoding,
 } from 'three';
 
 export const setupScene = () => {
-	const scene = new Scene();
-
-	const camera = new PerspectiveCamera(
-		50,
-		window.innerWidth / window.innerHeight,
-		0.1,
-		10,
-	);
-
-	scene.add(new HemisphereLight(0x606060, 0x404040));
-
-	const light = new DirectionalLight(0xffffff);
-	light.position.set(1, 1, 1).normalize();
-	scene.add(light);
-
-	const renderer = new WebGLRenderer({ alpha: true, antialias: true });
-	renderer.setPixelRatio(window.devicePixelRatio);
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	renderer.outputEncoding = sRGBEncoding;
+	const canvas = document.getElementById('canvas1');
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(60, 1.33, 0.1, 10000); // todo: more proper variables
+    const renderer = new WebGLRenderer({canvas: canvas});
 	renderer.xr.enabled = true;
-	document.body.appendChild(renderer.domElement);
+
+	const deviceOrientationControls = new DeviceOrientationControls(camera);
+	const arjs = new LocationBased(scene, camera);
+    const webcam = new WebcamRenderer(renderer);
 
 	window.addEventListener('resize', function () {
-		camera.aspect = window.innerWidth / window.innerHeight;
+		renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+		const aspect = canvas.clientWidth / canvas.clientHeight;
+		camera.aspect = aspect;
 		camera.updateProjectionMatrix();
-
-		renderer.setSize(window.innerWidth, window.innerHeight);
 	});
 
-	return { scene, camera, renderer };
+	return { scene, camera, renderer, arjs, webcam, deviceOrientationControls };
 };

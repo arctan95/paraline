@@ -25,9 +25,11 @@
 		"lint"
 	],
 	"dependencies": {
+		"@ar-js-org/ar.js": "^3.4.5",
+		"@arctan95/shuttle": "^0.2.0",
 		"elics": "^0.1.2",
 		"gamepad-wrapper": "1.2.0",
 		"ratk": "0.3.0",
-		"three": "0.159.0"
+		"three": "0.150.1"
 	}
 }
